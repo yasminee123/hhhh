@@ -16,5 +16,6 @@ export class ClientService {
     let data = this.http.get<any>(this.Url+'api/ClientVue/'+id);
     return data;
   }
+
 }
  

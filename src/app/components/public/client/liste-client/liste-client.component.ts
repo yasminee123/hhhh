@@ -4,6 +4,8 @@ import { Table } from 'primeng/table';
 import { Client } from 'src/app/interfaces/client';
 import { ClientService } from 'src/app/services/client.service';
 
+
+
 @Component({
   selector: 'app-liste-client',
   templateUrl: './liste-client.component.html',
@@ -11,53 +13,110 @@ import { ClientService } from 'src/app/services/client.service';
 })
 
 
+
 export class ListeClientComponent implements OnInit {
   clt: Client[] = []
-   CatTarif :any
-   Com:any
-   Reg:any
-   value:string=''
-   cars: any[]=[];
+  //sets
+  CatTarif: any
+  Com: any
+  Reg: any
+  //selected data
+  selectedCat: string[] = [];
+  selectedCom: string[] = [];
+  selectedReg: string[] = [];
+  //
+  auxClt: Client[] = []
 
-   //cli:any
+
   constructor(private ser: ClientService) { }
 
   ngOnInit(): void {
+    
     this.ser.getAllClients().subscribe(
-      res=>{
-        this.clt=res,console.log(res),
-        this.CatTarif=[...new Set( this.clt.map(obj => obj.Categorie_Tarifaire)) ],
-        //this.CatTarif = this.clt
-       // console.log(this.CatTarif)
-        
-        
-        //this.Com=[...new Set( this.clt.map(obj => obj.Nom_Commercial)) ],
-      // console.log(this.Com)
-        this.Reg=[...new Set( this.clt.map(obj => obj.Region ))]
-        //this.cli=[...new Set( this.clt.map(obj => obj.Nom_Client))],
+      res => {
+          this.clt = res,
+          this.CatTarif = [... new Set(this.clt.map(obj => obj.Categorie_Tarifaire))],
+          this.Com = [...new Set(this.clt.map(item => item.Nom_Commercial))].filter(elem => elem != null)
+          this.Reg = [... new Set(this.clt.map(obj => obj.Region))].filter(elem => elem != '')
       },
-     err=>console.log(err)
+      err => console.log(err)
     )
-
-    this.cars = [
-      { "brand": "VW", "year": 1000000000, "color": "Orange", "vin": "dsad231ff" },
-      { "brand": "Audi", "year": 2000000000, "color": "Black", "vin": "gwregre345" },
-      { "brand": "Renault", "year": 3000000000, "color": "Gray", "vin": "h354htr" },
-      { "brand": "BMW", "year": 4000000000, "color": "Blue", "vin": "j6w54qgh" },
-      { "brand": "Mercedes", "year": 2500000000, "color": "Orange", "vin": "hrtwy34" },
-      { "brand": "Volvo", "year": 5000000000, "color": "Black", "vin": "jejtyj" },
-      { "brand": "Honda", "year": 6800000000, "color": "Yellow", "vin": "g43gr" },
-      { "brand": "Jaguar", "year": 1200000000, "color": "Orange", "vin": "greg34" },
-      { "brand": "Ford", "year": 9000000000, "color": "Black", "vin": "h54hw5" },
-      { "brand": "Fiat", "year": 120000000000, "color": "Red", "vin": "245t2s" }
-    ];
+   
+      
   }
 
   clear(table: Table) {
     table.clear();
-}
+
+  }
+
+  GetSelectedCat() {
+    //Filtrer les commerciaux et les régions selon les catégories tarifaires
+    this.Com = []
+    this.Reg = []
+    var auxCom:any[]
+    var auxReg:any[]
+    console.log("cat 1")
+    console.log(this.Com)
+    console.log(this.Reg)
+    for (let cat of this.selectedCat) {
+      this.auxClt = this.clt.filter(elem => elem.Categorie_Tarifaire == cat)
+      auxCom = [...new Set(this.auxClt.map(item => item.Nom_Commercial))].filter(elem => elem != null)
+      auxReg = [... new Set(this.auxClt.map(obj => obj.Region))].filter(elem => elem != '')
+      this.Com=([... this.Com,...auxCom]).filter((v,i)=>([... this.Com,...auxCom]).indexOf(v)=== i)
+      this.Reg=([... this.Reg,...auxReg]).filter((v,i)=>([... this.Reg,...auxReg]).indexOf(v)=== i)
+    }
+    if (this.selectedCat.length == 0)
+      this.ngOnInit()
+  }
+
+  GetSelectedCom() {
+    //Filtrer les catégories tarifaires et les régions selon les commerciaux
+    //console.log(this.selectedCom)
+    this.CatTarif = []
+    this.Reg = []
+    console.log("comm 1")
+    console.log(this.CatTarif)
+    console.log(this.Reg)
+    for (let com of this.selectedCom) {
+      this.auxClt = this.clt.filter(elem => elem.Nom_Commercial == com)
+      let auxCat = [...new Set(this.auxClt.map(item => item.Categorie_Tarifaire))]
+      let auxReg = [...new Set(this.auxClt.map(obj => obj.Region))].filter(elem => elem != '')
+      this.Reg = ([... this.Reg, ...auxReg]).filter((v,i)=>([... this.Reg, ...auxReg]).indexOf(v)=== i)
+      this.CatTarif = ([... this.CatTarif, ...auxCat]).filter((v,i)=>([... this.CatTarif, ...auxCat]).indexOf(v)=== i)
+
+    }
+    console.log("comm 2")
+    console.log(this.Reg)
+    console.log(this.CatTarif)
+    if (this.selectedCom.length == 0)
+      this.ngOnInit()
+  }
+
+  GetSelectedReg() {
+    //Filtrer les commerciaux et les régions selon les catégories tarifaires
+    this.Com = []
+    this.CatTarif = []
+    console.log("cat 1")
+    console.log(this.Com)
+    console.log(this.CatTarif)
+    for (let reg of this.selectedReg) {
+      this.auxClt = this.clt.filter(elem => elem.Region == reg)
+      let auxCat = [...new Set(this.auxClt.map(item => item.Categorie_Tarifaire))]
+      let auxCom = [...new Set(this.auxClt.map(obj => obj.Nom_Commercial))].filter(elem => elem != null)
+      this.Com = ([... this.Com, ...auxCom]).filter((v,i)=>([... this.Com, ...auxCom]).indexOf(v)=== i)
+      this.CatTarif = ([... this.CatTarif, ...auxCat]).filter((v,i)=>([... this.CatTarif, ...auxCat]).indexOf(v)=== i)
+
+
+    }
+    console.log("cat 2")
+    console.log(this.CatTarif)
+    console.log(this.Com)
+    console.log(this.selectedReg)
+    if (this.selectedReg.length == 0)
+      this.ngOnInit()
+  }
 
 
 
 }
- 
